@@ -14,13 +14,20 @@ const appOrigin = process.env.APP_ORIGIN;
 const audience = process.env.AUTH0_AUDIENCE;
 const issuer = process.env.AUTH0_ISSUER;
 
+app.set("view engine", "hbs");
+
+var auth = require("./routes/auth");
+var load = require("./routes/load");
+var uninstall = require("./routes/uninstall");
+var index = require("./routes/index");
+
 if (!issuer || !audience) {
   throw new Error("Please make sure that .env is in place and populated");
 }
 
 app.use(morgan("dev"));
-app.use(helmet());
-app.use(cors({ origin: appOrigin }));
+// app.use(helmet());
+// app.use(cors({ origin: appOrigin }));
 
 const checkJwt = jwt({
   secret: jwksRsa.expressJwtSecret({
@@ -34,6 +41,12 @@ const checkJwt = jwt({
   issuer: issuer,
   algorithms: ["RS256"],
 });
+
+app.use("/", index);
+// app.use("/users", users);
+app.use("/auth", auth);
+app.use("/load", load);
+app.use("/uninstall", uninstall);
 
 app.get("/api/public-message", (req, res) => {
   res.send({
